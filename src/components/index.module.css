@@ -17,8 +17,7 @@
   margin: 0;
 }
 
-.listItem::marker {
-  color: #e95800;
+.listItem::marker {  color: #e95800;
 }
 
 .listItem:nth-child(2)::marker {

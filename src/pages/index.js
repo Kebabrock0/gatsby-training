@@ -1,122 +1,103 @@
 import * as React from "react"
-import { Link } from "gatsby"
-import { StaticImage } from "gatsby-plugin-image"
+import "../components/App.css"
+import { useState, useEffect } from "react";
+import jsonData from '../components/CityData/city.json';
 
-import Layout from "../components/layout"
-import Seo from "../components/seo"
-import * as styles from "../components/index.module.css"
 
-const links = [
-  {
-    text: "Tutorial",
-    url: "https://www.gatsbyjs.com/docs/tutorial",
-    description:
-      "A great place to get started if you're new to web development. Designed to guide you through setting up your first Gatsby site.",
-  },
-  {
-    text: "Examples",
-    url: "https://github.com/gatsbyjs/gatsby/tree/master/examples",
-    description:
-      "A collection of websites ranging from very basic to complex/complete that illustrate how to accomplish specific tasks within your Gatsby sites.",
-  },
-  {
-    text: "Plugin Library",
-    url: "https://www.gatsbyjs.com/plugins",
-    description:
-      "Learn how to add functionality and customize your Gatsby site or app with thousands of plugins built by our amazing developer community.",
-  },
-  {
-    text: "Build and Host",
-    url: "https://www.gatsbyjs.com/cloud",
-    description:
-      "Now you’re ready to show the world! Give your Gatsby site superpowers: Build and host on Gatsby Cloud. Get started for free!",
-  },
-]
+function App() {
+  const key = `oZIlTLaNHtMut974VoNGqzMkluXSlPoH7NtRal99pplGMPgsCsJuvhb6oWu5`;
 
-const samplePageLinks = [
-  {
-    text: "Page 2",
-    url: "page-2",
-    badge: false,
-    description:
-      "A simple example of linking to another page within a Gatsby site",
-  },
-  { text: "TypeScript", url: "using-typescript" },
-  { text: "Server Side Rendering", url: "using-ssr" },
-  { text: "Deferred Static Generation", url: "using-dsg" },
-]
+  const [county, setCounty] = useState(false);
 
-const moreLinks = [
-  { text: "Join us on Discord", url: "https://gatsby.dev/discord" },
-  {
-    text: "Documentation",
-    url: "https://gatsbyjs.com/docs/",
-  },
-  {
-    text: "Starters",
-    url: "https://gatsbyjs.com/starters/",
-  },
-  {
-    text: "Showcase",
-    url: "https://gatsbyjs.com/showcase/",
-  },
-  {
-    text: "Contributing",
-    url: "https://www.gatsbyjs.com/contributing/",
-  },
-  { text: "Issues", url: "https://github.com/gatsbyjs/gatsby/issues" },
-]
+  const city = jsonData
 
-const utmParameters = `?utm_source=starter&utm_medium=start-page&utm_campaign=default-starter`
 
-const IndexPage = () => (
-  <Layout>
-    <Seo title="Home" />
-    <div className={styles.textCenter}>
-      <StaticImage
-        src="../images/example.png"
-        loading="eager"
-        width={64}
-        quality={95}
-        formats={["auto", "webp", "avif"]}
-        alt=""
-        style={{ marginBottom: `var(--space-3)` }}
-      />
-      <h1>
-        Welcome to <b>Gatsby!</b>
-      </h1>
-      <p className={styles.intro}>
-        <b>Example pages:</b>{" "}
-        {samplePageLinks.map((link, i) => (
-          <React.Fragment key={link.url}>
-            <Link to={link.url}>{link.text}</Link>
-            {i !== samplePageLinks.length - 1 && <> · </>}
-          </React.Fragment>
-        ))}
-        <br />
-        Edit <code>src/pages/index.js</code> to update this page.
-      </p>
+
+  const [countyCity, setValue] = useState();
+
+  const [countyLast, setCountyValue] = useState();
+
+  const countySelectUrl = `https://www.nosyapi.com/apiv2/pharmacy/city?city=${countyCity}&apikey=oZIlTLaNHtMut974VoNGqzMkluXSlPoH7NtRal99pplGMPgsCsJuvhb6oWu5`;
+
+  useEffect(() => {
+    fetch(countySelectUrl)
+      .then((resp) => {
+        if (resp.ok && resp.status === 200) {
+          return resp.json();
+        }
+      })
+      .then((data) => setCounty(data))
+      .catch((err) => console.log(err));
+  },[countySelectUrl]);
+
+  const url = `https://www.nosyapi.com/apiv2/pharmacyLink?city=${countyCity}&county=${countyLast}&apikey=${key}`;
+
+  useEffect(() => {
+    fetch(url)
+      .then((res) => {
+        if (res.ok && res.status === 200) {
+          return res.json();
+        }
+      })
+      .then((data) => setEczane(data))
+      .catch((err) => console.log(err));
+  }, [url]);
+
+  const [eczane, setEczane] = useState(false);
+
+
+  
+  console.log(eczane)
+  return (
+    <div className="App">
+      <div className="container">
+        <div className="split left-container">
+          <h1>NÖBETÇİ ECZANE</h1>
+          <div className="select-container">
+            <select
+              id="cities"
+              value={countyCity}
+              onChange={(e) => setValue(e.target.value)}
+            >
+              {city &&
+                city.data.map((sehir, i) => (
+                  <option value={sehir.SehirSlug} key={i}>
+                    {sehir.SehirAd}
+                  </option>
+                ))}
+            </select>
+            <select
+              name="counties"
+              id="counties"
+              value={countyLast}
+              onChange={(c) => setCountyValue(c.target.value)}
+            >
+              {county &&
+                county.data.map((ilce, i) => (
+                  <option value={ilce.Slug} key={i}>
+                    {ilce.ilceAd}
+                  </option>
+                ))}
+            </select>
+          </div>
+        </div>  
+      </div>
+      <div className="container">
+        <div className="split right-container">
+          {eczane && 
+            eczane.data.map((eczaneler, j) => (
+              <div className="eczane-info" key={j}>
+                {eczane.data ? <h1> {eczaneler.EczaneAdi} </h1> : null}
+                {eczane.data ? <p>Adres: {eczaneler.Adresi} </p> : null}
+                {eczane.data ? <p>Telefon: {eczaneler.Telefon} </p> : null}
+                {eczane.data ? <p>Yol Tarifi: {eczaneler.YolTarifi} </p> : null}
+                {eczane.data ?<p> <a href={`https://www.google.com/maps/@${eczaneler.latitude},${eczaneler.longitude},18.4z`} target ="_blank" rel="noreferrer" >Konum</a></p> : null}
+              </div>
+            ))}
+        </div>
+      </div>
     </div>
-    <ul className={styles.list}>
-      {links.map(link => (
-        <li key={link.url} className={styles.listItem}>
-          <a
-            className={styles.listItemLink}
-            href={`${link.url}${utmParameters}`}
-          >
-            {link.text} ↗
-          </a>
-          <p className={styles.listItemDescription}>{link.description}</p>
-        </li>
-      ))}
-    </ul>
-    {moreLinks.map((link, i) => (
-      <React.Fragment key={link.url}>
-        <a href={`${link.url}${utmParameters}`}>{link.text}</a>
-        {i !== moreLinks.length - 1 && <> · </>}
-      </React.Fragment>
-    ))}
-  </Layout>
-)
+  );
+}
 
-export default IndexPage
+export default App;
